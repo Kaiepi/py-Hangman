@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-from random import randint
+from random import choice
 
 class Hangman:
 
     """
     self.target        - the progress of the guessed word
-    self.guessed       - guessed letters and words
+    self.guessed       - guessed letters
+    self.guessed_words - guessed words
     self.wrong_answers - number of mistakes made, a maximum of 6 allowed
     self.ended         - whether or not the game is finished
     self.__word        - the full word you're attempting to guess
@@ -14,6 +15,7 @@ class Hangman:
     def __init__(self):
         self.target        = ''
         self.guessed       = set()
+        self.guessed_words = set()
         self.wrong_answers = 0
         self.ended         = False
         self.__word        = ''
@@ -41,30 +43,33 @@ class Hangman:
     def reset(self):
         self.target = ''
         self.guessed.clear()
+        self.guessed_words.clear()
         self.wrong_answers = 0
         self.ended = False
         self.__word = ''
 
     def get_random_word(self):
-        with open('dictionary', 'r') as f:
-            lines = f.readlines()
-            idx = randint(0, len(lines))
-            self.__word = lines[idx].rstrip()
+        with open('dictionary', 'r') as fh:
+            lines = fh.readlines()
+            self.__word = choice(lines).rstrip()
 
     def update_word(self):
-        output = []
+        target = ''
         for ch in self.__word:
             if ch in self.guessed:
-                output.append(ch)
+                target += ch
             else:
-                output.append('_')
-        self.target = ''.join(output)
+                target += '_'
+        self.target = target
 
     def print_info(self):
         print(self.target)
         guessed = sorted(self.guessed)
         guessed = ' '.join(guessed)
-        print(f'Guessed: {guessed}')
+        print(f'Guessed letters: {guessed}')
+        guessed_words = sorted(self.guessed_words)
+        guessed_words = ' '.join(guessed_words)
+        print(f'Guessed words:   {guessed_words}')
 
     def get_guess(self):
         guess = '';
@@ -84,6 +89,8 @@ class Hangman:
 
         if len(guess) == 1:
             self.guessed.add(guess)
+        else:
+            self.guessed_words.add(guess)
 
         if guess not in self.__word:
             print(f'{guess} is not in or is not the current word.')
